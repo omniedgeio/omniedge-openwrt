@@ -37,6 +37,13 @@ endef
 define Package/omniedge/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(BUILD_DIR)/omniedge $(1)/usr/bin/omniedge
+
+	$(INSTALL_DIR) $(1)/etc/init.d/
+	$(CP) $(CURDIR)/files/omniedge.init $(1)/etc/init.d/omniedge
+
+	$(INSTALL_DIR) $(1)/etc/
+	$(CP) $(CURDIR)/files/omniedge $(1)/etc/
+	
 endef
 
 $(eval $(call BuildPackage,omniedge))
