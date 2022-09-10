@@ -18,7 +18,7 @@ define Package/omniedge
 	SECTION:=net
 	CATEGORY:=Network
 	SUBMENU:=VPN
-	TITLE:=Bring intranet on the internet.What happens in intranet, stays in in intranet.
+	TITLE:=Bring intranet on the internet.
 	URL:=https://github.com/omniedgeio/omniedge
 endef
 
