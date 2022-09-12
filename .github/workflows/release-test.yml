@@ -52,7 +52,7 @@ jobs:
           esac
       - name: prepare 
         run: |
-          wget -O omniedge.tar.xz https://codeload.github.com/omniedgeio/omniedge/tar.gz/v0.2.4?
+          wget -O omniedge.tar.gz https://codeload.github.com/omniedgeio/omniedge/tar.gz/v0.2.4?
           pwd
           HASH_256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- ./omniedge.tar.gz)
       - name: Build and push
@@ -62,7 +62,7 @@ jobs:
           platforms: ${{ env.DOCKER_PLATFORM }}
           push: false
           load: true
-          file: docker/openwrt-binary/Dockerfile-ubuntu-${{ matrix.target.arch }}
+          file: docker/Dockerfile-ubuntu-${{ matrix.target.arch }}
           build-args: |
             BUILD_ENV=${{ env.ENVIRONMENT }}
             OPENWRT_SDK=${{matrix.target.sdk}}
