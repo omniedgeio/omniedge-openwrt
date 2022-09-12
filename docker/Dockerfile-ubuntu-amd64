@@ -13,15 +13,16 @@ RUN apt -y install wget make git automake build-essential autoconf openssl gzip 
 
 RUN wget -O openwrt-sdk.tar.xz ${OPENWRT_SDK}
 RUN xz -q -d openwrt-sdk.tar.xz && tar -xvf openwrt-sdk.tar
-RUN mv -f openwrt-sdk-* openwrt-sdk
+RUN mv -f openwrt-sdk-* openwrt-sdk && rm openwrt-sdk.tar
+
 
 COPY . .
 
 RUN pwd && ls
-RUN ./openwrt-sdk/staging_dir/toolchain-x86_64_gcc-11.2.0_musl/bin/x86_64-openwrt-linux-gcc -v
+RUN /go/openwrt-sdk/staging_dir/toolchain-x86_64_gcc-11.2.0_musl/bin/x86_64-openwrt-linux-gcc -v
 
-ENV CC=./openwrt-sdk/staging_dir/toolchain-x86_64_gcc-11.2.0_musl/bin/x86_64-openwrt-linux-gcc
-ENV CXX=./openwrt-sdk/staging_dir/toolchain-x86_64_gcc-11.2.0_musl/bin/x86_64-openwrt-linux-g++
+ENV CC=/go/openwrt-sdk/staging_dir/toolchain-x86_64_gcc-11.2.0_musl/bin/x86_64-openwrt-linux-gcc
+ENV CXX=/go/openwrt-sdk/staging_dir/toolchain-x86_64_gcc-11.2.0_musl/bin/x86_64-openwrt-linux-g++
 ENV CGO_ENABLED=1 
 ENV GOARCH=amd64
 ENV CROSS_OPENWRT=openwrt
@@ -30,10 +31,10 @@ ENV CROSS_OPENWRT=openwrt
 # RUN upx -9 -k /app/out/omniedge
 # RUN zip -j /app/out/omniedge.zip /app/out/omniedge
 
-RUN echo "src-link omniedge $GITHUB_WORKSPACE" > ./openwrt-sdk/feeds.conf &&\
+RUN echo "src-link omniedge $GITHUB_WORKSPACE" > openwrt-sdk/feeds.conf &&\
     echo 'CONFIG_PACKAGE_omniedge=y &&\
-    ' >> ./openwrt-sdk/.config &&\
-    cd ./openwrt-sdk &&\
+    ' >> openwrt-sdk/.config &&\
+    cd openwrt-sdk &&\
     cat feeds.conf.default >> feeds.conf &&\
     cat feeds.conf &&\
     ./scripts/feeds update -a -f > /dev/null &&\
