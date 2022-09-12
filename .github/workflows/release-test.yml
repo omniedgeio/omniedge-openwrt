@@ -55,6 +55,7 @@ jobs:
           wget -O omniedge.tar.gz https://codeload.github.com/omniedgeio/omniedge/tar.gz/v0.2.4?
           pwd
           HASH_256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- ./omniedge.tar.gz)
+          echo $HASH_256
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
