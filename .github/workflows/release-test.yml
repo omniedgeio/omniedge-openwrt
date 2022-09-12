@@ -21,76 +21,42 @@ jobs:
       - name: Checkout with tag
         uses: actions/checkout@master
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Cache
-        uses: actions/cache@v2
-        env:
-          cache-name: omniedgecli-openwrt-${{ matrix.target.arch }}
-        with:
-          path: |
-            /tmp/.buildx-cache
-          key: ${{ matrix.target.arch }}-build-${{ env.cache-name }}
-          restore-keys: |
-            ${{ matrix.target.arch }}-build-${{ env.cache-name }}
-
-      - name: dockerx platform
+      - name: prepare requirements
         run: |
-          case ${{ matrix.target.arch }} in
-            amd64)
-            echo "DOCKER_PLATFORM=linux/amd64" >> $GITHUB_ENV
-            ;;
-            386)
-            echo "DOCKER_PLATFORM=linux/386" >> $GITHUB_ENV
-            ;;
-            arm64v8)
-            echo "DOCKER_PLATFORM=linux/arm64" >> $GITHUB_ENV
-            ;;
-          esac
-      - name: prepare 
-        run: |
-          wget -O omniedge.tar.gz https://codeload.github.com/omniedgeio/omniedge/tar.gz/v0.2.4?
-          pwd
-          HASH_256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- ./omniedge.tar.gz)
-          echo $HASH_256
+          sudo -E apt-get -y update
+          sudo -E apt-get install -y openssl
+          sudo -E apt-get install -y build-essential
+          sudo -E apt-get install -y libssl-dev
+          sudo -E apt-get install -y zip gzip upx wget make git
           
-      - name: Build and push
-        uses: docker/build-push-action@v2
+      - name: setup golang
+        uses: actions/setup-go@v2
         with:
-          context: .
-          platforms: ${{ env.DOCKER_PLATFORM }}
-          push: false
-          load: true
-          file: docker/Dockerfile-ubuntu-${{ matrix.target.arch }}
-          build-args: |
-            BUILD_ENV=${{ env.ENVIRONMENT }}
-            OPENWRT_SDK=${{matrix.target.sdk}}
-            OMNIEDGE_VERSION=v0.2.4
-            ARCH=${{matrix.target.arch}}
-            HASH256=$HASH_256
-          tags: cli:0.1
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
+          go-version: '1.16.6'
 
-      - name: Move cache
+      - name: go mod download
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          go mod download
 
-      - name: run binfmt
+      - name: Install OpenWrt SDK
         run: |
-          docker run --privileged --rm tonistiigi/binfmt --install all
+          wget -O openwrt-sdk.tar.xz ${{ matrix.target.sdk }}
+          xz -q -d openwrt-sdk.tar.xz && tar -xvf openwrt-sdk.tar
+          mv -f openwrt-sdk-* openwrt-sdk
 
-      - name: run cli
+      - name: Build Package
         run: |
-          docker run --name omniedge -t -d cli:0.1
-      - name: copy file
-        run: |
-          docker cp omniedge:openwrt-sdk/bin/packages/*/omniedge/omniedge*.ipk ./
-          docker cp omniedge:/app/out/omniedge.zip ./omniedge.zip
+          echo "src-link omniedge $GITHUB_WORKSPACE" > openwrt-sdk/feeds.conf
+          echo 'CONFIG_PACKAGE_omniedge=y
+          ' >> openwrt-sdk/.config
+          cd openwrt-sdk
+          cat feeds.conf.default >> feeds.conf
+          cat feeds.conf
+          ./scripts/feeds update -a > /dev/null
+          make defconfig
+          ./scripts/feeds install -d y -f -a
+          make package/netbird/compile V=s
+          tree bin/packages/
 
       - name: Archive package
         uses: actions/upload-artifact@v2
