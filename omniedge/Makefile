@@ -42,6 +42,13 @@ endef
 # 	true
 # endef
 
+define Build/Compile
+    CXX="$(TARGET_CROSS)g++"
+	CC="$(TARGET_CROSS)gcc"
+endef
+endef
+
+
 # define Build/Configure
 # 	true
 # endef

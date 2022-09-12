@@ -41,7 +41,9 @@ jobs:
           echo "OMNIEDGE_VERSION=v0.2.4" >> $GITHUB_ENV
           echo "ARCH=${{ matrix.target.arch }}" >> $GITHUB_ENV
           echo "HASH256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge.tar.gz)" >> $GITHUB_ENV
-
+          echo "CROSS_OPENWRT=openwrt" >> $GITHUB_ENV
+          echo "BUILD_ENV = ${{env.ENVIRONMENT}}" >> $GITHUB_ENV
+          
       - name: Build Package
         run: |
           echo "src-link omniedge $GITHUB_WORKSPACE" > openwrt-sdk/feeds.conf
