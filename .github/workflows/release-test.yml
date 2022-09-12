@@ -1,0 +1,107 @@
+name: build openwrt
+on:
+  push:
+    branches:
+      - dev
+    tags: [ 'v*' ]
+  pull_request:
+
+jobs:
+  build-openwrt-1:
+    name: Build openwrt binary
+    env:
+      ENVIRONMENT: prod
+    strategy:
+      matrix:
+        target:
+          - arch: "amd64"
+            sdk: "https://downloads.openwrt.org/releases/22.03.0-rc5/targets/rockchip/armv8/openwrt-sdk-22.03.0-rc5-rockchip-armv8_gcc-11.2.0_musl.Linux-x86_64.tar.xz"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout with tag
+        uses: actions/checkout@master
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache
+        uses: actions/cache@v2
+        env:
+          cache-name: omniedgecli-openwrt-${{ matrix.target.arch }}
+        with:
+          path: |
+            /tmp/.buildx-cache
+          key: ${{ matrix.target.arch }}-build-${{ env.cache-name }}
+          restore-keys: |
+            ${{ matrix.target.arch }}-build-${{ env.cache-name }}
+
+      - name: dockerx platform
+        run: |
+          case ${{ matrix.target.arch }} in
+            amd64)
+            echo "DOCKER_PLATFORM=linux/amd64" >> $GITHUB_ENV
+            ;;
+            386)
+            echo "DOCKER_PLATFORM=linux/386" >> $GITHUB_ENV
+            ;;
+            arm64v8)
+            echo "DOCKER_PLATFORM=linux/arm64" >> $GITHUB_ENV
+            ;;
+          esac
+      - name: prepare 
+        run: |
+          wget https://codeload.github.com/omniedgeio/omniedge/tar.gz/${{ github.ref_name }}?
+          HASH_256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge-${{ github.ref_name }}.tar.gz)
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          platforms: ${{ env.DOCKER_PLATFORM }}
+          push: false
+          load: true
+          file: docker/openwrt-binary/Dockerfile-ubuntu-${{ matrix.target.arch }}
+          build-args: |
+            BUILD_ENV=${{ env.ENVIRONMENT }}
+            OPENWRT_SDK=${{matrix.target.sdk}}
+            OMNIEDGE_VERSION=${{ github.ref_name }}
+            ARCH=${{matrix.target.arch}}
+            HASH256=$HASH_256
+          tags: cli:0.1
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      - name: run binfmt
+        run: |
+          docker run --privileged --rm tonistiigi/binfmt --install all
+
+      - name: run cli
+        run: |
+          docker run --name omniedge -t -d cli:0.1
+      - name: copy file
+        run: |
+          docker cp omniedge:openwrt-sdk/bin/packages/*/omniedge/omniedge*.ipk ./
+          docker cp omniedge:/app/out/omniedge.zip ./omniedge.zip
+
+      - name: Archive package
+        uses: actions/upload-artifact@v2
+        with:
+          name: omniedge-${{ matrix.target.arch }}
+          path: openwrt-sdk/bin/packages/*/omniedge/omniedge*.ipk
+          if-no-files-found: error
+      
+      - name: Upload package to GitHub Release
+        uses: svenstaro/upload-release-action@v2
+        # if: "startsWith(github.ref, 'refs/tags/')"
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file_glob: true
+          overwrite: true
+          file: openwrt-sdk/bin/packages/*/omniedge/omniedge*.ipk
+          tag: ${{ github.ref }}
