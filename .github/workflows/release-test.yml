@@ -29,11 +29,6 @@ jobs:
           sudo -E apt-get install -y libssl-dev
           sudo -E apt-get install -y zip gzip upx wget make git
 
-      - name: setup golang
-        uses: actions/setup-go@v2
-        with:
-          go-version: '1.16.6'
-
       - name: Install OpenWrt SDK
         run: |
           wget -O openwrt-sdk.tar.xz ${{ matrix.target.sdk }}

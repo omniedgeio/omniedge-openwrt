@@ -7,7 +7,7 @@ PKG_ARCH:= $$(ARCH)
 
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/omniedgeio/omniedge/tar.gz/v$(PKG_VERSION)?
+PKG_SOURCE_URL:=https://codeload.github.com/omniedgeio/omniedge/tar.gz/$(PKG_VERSION)?
 PKG_HASH:=$$(HASH256)
 
 PKG_MAINTAINER:=omniedge <hi@omniedge.io>
