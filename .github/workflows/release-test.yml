@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-openwrt-1:
-    name: Build openwrt binary
+    name: Build openwrt ${{matrix.target.arch}}
     env:
       ENVIRONMENT: prod
     strategy:
@@ -52,8 +52,8 @@ jobs:
           esac
       - name: prepare 
         run: |
-          wget https://codeload.github.com/omniedgeio/omniedge/tar.gz/${{ github.ref_name }}?
-          HASH_256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge-${{ github.ref_name }}.tar.gz)
+          wget https://codeload.github.com/omniedgeio/omniedge/tar.gz/v0.2.4?
+          HASH_256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge-v0.2.4.tar.gz)
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -65,7 +65,7 @@ jobs:
           build-args: |
             BUILD_ENV=${{ env.ENVIRONMENT }}
             OPENWRT_SDK=${{matrix.target.sdk}}
-            OMNIEDGE_VERSION=${{ github.ref_name }}
+            OMNIEDGE_VERSION=v0.2.4
             ARCH=${{matrix.target.arch}}
             HASH256=$HASH_256
           tags: cli:0.1
