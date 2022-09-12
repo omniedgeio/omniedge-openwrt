@@ -33,7 +33,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: '1.16.6'
-          
+
       - name: Install OpenWrt SDK
         run: |
           wget -O openwrt-sdk.tar.xz ${{ matrix.target.sdk }}
@@ -51,7 +51,7 @@ jobs:
           ./scripts/feeds update -a > /dev/null
           make defconfig
           ./scripts/feeds install -d y -f -a
-          make package/netbird/compile V=s
+          make package/omniedge/compile V=s
           tree bin/packages/
 
       - name: Archive package
