@@ -31,8 +31,8 @@ ENV CROSS_OPENWRT=openwrt
 # RUN upx -9 -k /app/out/omniedge
 # RUN zip -j /app/out/omniedge.zip /app/out/omniedge
 
-RUN echo "src-link omniedge $GITHUB_WORKSPACE" > openwrt-sdk/feeds.conf &&\
-    echo 'CONFIG_PACKAGE_omniedge=y &&\
+RUN echo "src-link omniedge" > openwrt-sdk/feeds.conf && \
+    echo 'CONFIG_PACKAGE_omniedge=y && \
     ' >> openwrt-sdk/.config &&\
     cd openwrt-sdk &&\
     cat feeds.conf.default >> feeds.conf &&\
