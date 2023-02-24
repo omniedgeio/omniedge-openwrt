@@ -17,6 +17,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/omniedge
 	SECTION:=net
 	CATEGORY:=Network
+	DEPENDS:=+ca-bundle +kmod-tun
 	SUBMENU:=VPN
 	TITLE:=Bring intranet on the internet.
 	URL:=https://github.com/omniedgeio/omniedge

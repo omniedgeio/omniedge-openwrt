@@ -38,10 +38,16 @@ jobs:
           xz -q -d openwrt-sdk.tar.xz && tar -xvf openwrt-sdk.tar
           mv -f openwrt-sdk-* openwrt-sdk    
 
-      - name: download binary
+      - name: prepare for make and download binary
         run: | 
-          wget https://github.com/omniedgeio/omniedge/releases/download/${{ github.ref_name }}/omniedge-${{ github.ref_name }}-openwrt-${{ matrix.target.arch }}.zip
-          
+          tag='refs/tags/'
+          major=$(echo $tag | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\1/')
+          minor=$(echo $tag | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\2/')
+          patch=$(echo $tag | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\3/')
+          build=$(echo $tag | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\4/')
+          echo "Parsed tag: major=$major, minor=$minor, patch=$patch, build=$build"
+          version=$major.$minor.$patch
+          wget https://github.com/omniedgeio/omniedge/releases/download/${{ version }}/omniedge-${{ version }}-openwrt-${{ matrix.target.arch }}.zip
       - name: prepare for makefile
         run: |
           echo "OMNIEDGE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
