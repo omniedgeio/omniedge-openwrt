@@ -52,7 +52,7 @@ jobs:
         run: |
           echo "OMNIEDGE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "ARCH=${{ matrix.target.arch }}" >> $GITHUB_ENV
-          echo "HASH256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge-v$version-openwrt-${{ matrix.target.arch }}.zip)" >> $GITHUB_ENV
+          echo "HASH256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge-v${version}-openwrt-${{ matrix.target.arch }}.zip)" >> $GITHUB_ENV
 
       - name: Build Package
         run: |
