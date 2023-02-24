@@ -23,8 +23,8 @@ jobs:
             sdk: "https://downloads.openwrt.org/releases/22.03.0-rc5/targets/x86/64/openwrt-sdk-22.03.0-rc5-x86-64_gcc-11.2.0_musl.Linux-x86_64.tar.xz"
           - arch: "mips"
             sdk: "https://downloads.openwrt.org/releases/19.07.9/targets/ar71xx/generic/openwrt-sdk-19.07.9-ar71xx-generic_gcc-7.5.0_musl.Linux-x86_64.tar.xz"
-          - arch: "mipsle"
-            sdk: "https://downloads.openwrt.org/releases/18.06.9/targets/ramips/mt7621/openwrt-sdk-18.06.9-ramips-mt7621_gcc-7.3.0_musl.Linux-x86_64.tar.xz"
+          # - arch: "mipsle"
+          #   sdk: "https://downloads.openwrt.org/releases/18.06.9/targets/ramips/mt7621/openwrt-sdk-18.06.9-ramips-mt7621_gcc-7.3.0_musl.Linux-x86_64.tar.xz"
     steps:
       - uses: actions/checkout@v2
       - name: Install build requirements
@@ -54,7 +54,7 @@ jobs:
           echo "HASH256: $HASH256"
           echo "OMNIEDGE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
           echo "ARCH=${{ matrix.target.arch }}" >> $GITHUB_ENV
-          echo "HASH256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- *.zip)" >> $GITHUB_ENV
+          echo "HASH256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge-v$version-openwrt-${{ matrix.target.arch }}.zip)" >> $GITHUB_ENV
 
       - name: Build Package
         run: |
