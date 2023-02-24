@@ -47,7 +47,7 @@ jobs:
           build=$(echo $tag | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\4/')
           echo "Parsed tag: major=$major, minor=$minor, patch=$patch, build=$build"
           version=$major.$minor.$patch
-          wget https://github.com/omniedgeio/omniedge/releases/download/$version/omniedge-$version-openwrt-${{ matrix.target.arch }}.zip
+          wget https://github.com/omniedgeio/omniedge/releases/download/v$version/omniedge-v$version-openwrt-${{ matrix.target.arch }}.zip
       - name: prepare for makefile
         run: |
           echo "OMNIEDGE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
