@@ -30,7 +30,7 @@ jobs:
       - name: Install build requirements
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget build-essential autoconf openssl gzip libssl-dev zip upx -y 
+          sudo apt-get install -y wget build-essential autoconf openssl gzip libssl-dev zip upx python2.7 -y 
 
       - name: Install OpenWrt SDK
         run: |
