@@ -14,23 +14,19 @@ jobs:
       matrix:
         target:
           - arch: "arm"
-            sdk: "https://archive.openwrt.org/releases/21.02.3/targets/ipq40xx/generic/openwrt-sdk-21.02.3-ipq40xx-generic_gcc-8.4.0_musl_eabi.Linux-x86_64.tar.xz"
+            sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/ipq40xx/generic/openwrt-sdk-23.05.0-ipq40xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
           - arch: "aarch64"
-            sdk: "https://downloads.openwrt.org/releases/22.03.0-rc5/targets/rockchip/armv8/openwrt-sdk-22.03.0-rc5-rockchip-armv8_gcc-11.2.0_musl.Linux-x86_64.tar.xz"
-          - arch: "i386"
-            sdk: "https://downloads.openwrt.org/releases/22.03.0-rc5/targets/x86/generic/openwrt-sdk-22.03.0-rc5-x86-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz"
+            sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/rockchip/armv8/openwrt-sdk-23.05.0-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
           - arch: "x86_64"
-            sdk: "https://downloads.openwrt.org/releases/22.03.0-rc5/targets/x86/64/openwrt-sdk-22.03.0-rc5-x86-64_gcc-11.2.0_musl.Linux-x86_64.tar.xz"
+            sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/x86/64/openwrt-sdk-23.05.0-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
           - arch: "mips"
-            sdk: "https://downloads.openwrt.org/releases/19.07.9/targets/ar71xx/generic/openwrt-sdk-19.07.9-ar71xx-generic_gcc-7.5.0_musl.Linux-x86_64.tar.xz"
-          # - arch: "mipsle"
-          #   sdk: "https://downloads.openwrt.org/releases/18.06.9/targets/ramips/mt7621/openwrt-sdk-18.06.9-ramips-mt7621_gcc-7.3.0_musl.Linux-x86_64.tar.xz"
+            sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/ath79/generic/openwrt-sdk-23.05.0-ath79-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install build requirements
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget build-essential autoconf openssl gzip libssl-dev zip upx python2.7 -y 
+          sudo apt-get install -y wget build-essential autoconf openssl gzip libssl-dev zip python3 -y 
 
       - name: Install OpenWrt SDK
         run: |
@@ -48,7 +44,7 @@ jobs:
           echo "Parsed tag: major=$major, minor=$minor, patch=$patch, build=$build"
           version=$major.$minor.$patch
           echo "version=$major.$minor.$patch" >> $GITHUB_ENV
-          wget https://github.com/omniedgeio/omniedge/releases/download/v$version/omniedge-v$version-openwrt-${{ matrix.target.arch }}.zip
+          wget https://github.com/omniedgeio/omniedge-cli/releases/download/v$version/omniedge-v$version-openwrt-${{ matrix.target.arch }}.zip
       
           HASH256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge-v$version-openwrt-${{ matrix.target.arch }}.zip)
           echo "HASH256: $HASH256"
@@ -73,7 +69,7 @@ jobs:
           tree bin/packages/
 
       - name: Archive package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: omniedge-${{ matrix.target.arch }}
           path: openwrt-sdk/bin/packages/*/omniedge/omniedge*.ipk
