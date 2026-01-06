@@ -26,15 +26,24 @@ jobs:
             echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Update version in README
+      - name: Update README and Makefile
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # Update any version references in README if they exist
-          if grep -q "v[0-9]*\.[0-9]*\.[0-9]*" README.md; then
-            sed -i "s/v[0-9]*\.[0-9]*\.[0-9]*/v${VERSION}/g" README.md
+          
+          # Update version in README if present
+          if grep -q "Latest version:" README.md; then
+            sed -i "s/Latest version: .*/Latest version: ${VERSION}/" README.md
+          else
+            # Add version line after title
+            sed -i "1a\\\\n> Latest version: ${VERSION}" README.md
           fi
-          echo "CLI_VERSION=${VERSION}" > .cli-version
-          echo "Updated CLI version to ${VERSION}"
+          
+          # Update Makefile if it has CLI_VERSION
+          if [ -f Makefile ] && grep -q "CLI_VERSION" Makefile; then
+            sed -i "s/CLI_VERSION=.*/CLI_VERSION=${VERSION}/" Makefile
+          fi
+          
+          echo "Updated to version ${VERSION}"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
@@ -48,12 +57,12 @@ jobs:
             This PR was automatically created by the CLI release workflow.
 
             **Changes:**
-            - Updated CLI version reference to `${{ steps.version.outputs.version }}`
-            - Created `.cli-version` file
+            - Updated `README.md` with new version
+            - Updated `Makefile` CLI_VERSION (if applicable)
 
             **CLI Release:** https://github.com/omniedgeio/omniedge-cli/releases/tag/v${{ steps.version.outputs.version }}
-
-            **Note:** Please update the `Makefile` with the new CLI download URL if needed.
+            
+            **Note:** After merging, build and test the OpenWrt package with the new CLI version.
           branch: auto-upgrade/cli-v${{ steps.version.outputs.version }}
           base: main
           labels: |
