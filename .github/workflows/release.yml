@@ -13,14 +13,21 @@ jobs:
     strategy:
       matrix:
         target:
-          - arch: "arm"
-            sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/ipq40xx/generic/openwrt-sdk-23.05.0-ipq40xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
-          - arch: "aarch64"
-            sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/rockchip/armv8/openwrt-sdk-23.05.0-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
           - arch: "x86_64"
+            cli_arch: "amd64"
             sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/x86/64/openwrt-sdk-23.05.0-x86-64_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+          - arch: "aarch64"
+            cli_arch: "arm64"
+            sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/rockchip/armv8/openwrt-sdk-23.05.0-rockchip-armv8_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+          - arch: "arm"
+            cli_arch: "arm"
+            sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/ipq40xx/generic/openwrt-sdk-23.05.0-ipq40xx-generic_gcc-12.3.0_musl_eabi.Linux-x86_64.tar.xz"
           - arch: "mips"
+            cli_arch: "mips"
             sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/ath79/generic/openwrt-sdk-23.05.0-ath79-generic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+          - arch: "mipsle"
+            cli_arch: "mipsle"
+            sdk: "https://downloads.openwrt.org/releases/23.05.0/targets/ramips/mt7621/openwrt-sdk-23.05.0-ramips-mt7621_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
     steps:
       - uses: actions/checkout@v4
       - name: Install build requirements
@@ -36,21 +43,30 @@ jobs:
 
       - name: download binary
         run: | 
-          tag=${{ github.ref_name }}
-          major=$(echo $tag | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\1/')
-          minor=$(echo $tag | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\2/')
-          patch=$(echo $tag | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\3/')
-          build=$(echo $tag | sed 's/^v\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)\.\([0-9]*\)$/\4/')
-          echo "Parsed tag: major=$major, minor=$minor, patch=$patch, build=$build"
-          version=$major.$minor.$patch
-          echo "version=$major.$minor.$patch" >> $GITHUB_ENV
-          wget https://github.com/omniedgeio/omniedge-cli/releases/download/v$version/omniedge-v$version-openwrt-${{ matrix.target.arch }}.zip
-      
-          HASH256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge-v$version-openwrt-${{ matrix.target.arch }}.zip)
-          echo "HASH256: $HASH256"
-          echo "OMNIEDGE_VERSION=${{ github.ref_name }}" >> $GITHUB_ENV
+          if [[ "${{ github.ref_name }}" == v* ]]; then
+            version="${{ github.ref_name }}"
+            version_no_v="${version#v}"
+          else
+            version="v0.3.0"
+            version_no_v="0.3.0"
+          fi
+          
+          echo "version=$version" >> $GITHUB_ENV
+          echo "OMNIEDGE_VERSION=$version_no_v" >> $GITHUB_ENV
           echo "ARCH=${{ matrix.target.arch }}" >> $GITHUB_ENV
-          echo "HASH256=$(sh -c 'sha256sum < "$1" | cut -d" " -f1' -- omniedge-v$version-openwrt-${{ matrix.target.arch }}.zip)" >> $GITHUB_ENV
+          
+          zip_file="omniedge-${version}-openwrt-${{ matrix.target.cli_arch }}.zip"
+          wget "https://github.com/omniedgeio/omniedge-cli/releases/download/${version}/${zip_file}"
+          
+          # Rename to match Makefile PKG_SOURCE
+          target_zip="omniedge-${version}-openwrt-${{ matrix.target.arch }}.zip"
+          if [ "$zip_file" != "$target_zip" ]; then
+            mv "$zip_file" "$target_zip"
+          fi
+          
+          HASH256=$(sha256sum "$target_zip" | cut -d" " -f1)
+          echo "HASH256=$HASH256" >> $GITHUB_ENV
+          echo "HASH256: $HASH256"
 
       - name: Build Package
         run: |

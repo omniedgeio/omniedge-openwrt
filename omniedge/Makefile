@@ -1,13 +1,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=omniedge
-PKG_VERSION:=$$(OMNIEDGE_VERSION)
+OMNIEDGE_VERSION?=0.3.0
+PKG_VERSION:=$(OMNIEDGE_VERSION)
 PKG_RELEASE:=$(AUTORELEASE)
-PKG_ARCH:= $$(ARCH)
+PKG_ARCH:=$(ARCH)
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-openwrt-$(PKG_ARCH).zip
-PKG_SOURCE_URL:=https://github.com/omniedgeio/omniedge/releases/download/${PKG_VERSION}
-PKG_HASH:=$$(HASH256)
+PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION)-openwrt-$(PKG_ARCH).zip
+PKG_SOURCE_URL:=https://github.com/omniedgeio/omniedge-cli/releases/download/v$(PKG_VERSION)
+PKG_HASH:=$(HASH256)
 
 PKG_MAINTAINER:=omniedge <hi@omniedge.io>
 PKG_LICENSE:=GPL-3.0
@@ -25,6 +26,11 @@ endef
 
 define Package/omniedge/description
 	Bring everything into intranet.
+endef
+
+define Build/Prepare
+	mkdir -p $(PKG_BUILD_DIR)
+	$(UNZIP) -d $(PKG_BUILD_DIR) $(DL_DIR)/$(PKG_SOURCE)
 endef
 
 define Build/Compile

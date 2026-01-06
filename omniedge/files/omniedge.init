@@ -7,7 +7,7 @@ STOP=15
 BIN=/usr/bin/omniedge
 AUTH=/etc/omniedge/auth.json
 security_key=OMNIEDGE_SECURITY_KEY
-virtual_network_id=OMNIEDGE_VIRUTALNETWORK_ID
+virtual_network_id=OMNIEDGE_VIRTUALNETWORK_ID
 
 
 start() {
