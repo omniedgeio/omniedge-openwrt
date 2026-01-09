@@ -40,9 +40,9 @@ jobs:
             sed -i "1a\\\\n> Latest version: ${VERSION}" README.md
           fi
           
-          # Update Makefile if it has CLI_VERSION
-          if [ -f Makefile ] && grep -q "CLI_VERSION" Makefile; then
-            sed -i "s/CLI_VERSION=.*/CLI_VERSION=${VERSION}/" Makefile
+          # Update omniedge/Makefile OMNIEDGE_VERSION
+          if [ -f omniedge/Makefile ]; then
+            sed -i "s/OMNIEDGE_VERSION?=.*/OMNIEDGE_VERSION?=${VERSION}/" omniedge/Makefile
           fi
           
           echo "Updated to version ${VERSION}"
