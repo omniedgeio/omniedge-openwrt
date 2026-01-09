@@ -54,7 +54,7 @@ jobs:
           echo "ARCH=${{ matrix.target.arch }}" >> $GITHUB_ENV
           
           zip_file="omniedge-${version}-openwrt-${{ matrix.target.cli_arch }}.zip"
-          wget "https://github.com/omniedgeio/omniedge-cli/releases/download/${version}/${zip_file}"
+          wget "https://github.com/omniedgeio/omniedge/releases/download/${version}/${zip_file}"
           
           # Rename to match Makefile PKG_SOURCE
           target_zip="omniedge-${version}-openwrt-${{ matrix.target.arch }}.zip"
