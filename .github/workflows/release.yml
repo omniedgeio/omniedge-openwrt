@@ -45,8 +45,8 @@ jobs:
             version="${{ github.ref_name }}"
             version_no_v="${version#v}"
           else
-            version="v0.3.0"
-            version_no_v="0.3.0"
+            version="v1.0.1"
+            version_no_v="1.0.1"
           fi
           
           echo "version=$version" >> $GITHUB_ENV
@@ -62,7 +62,11 @@ jobs:
             mv "$zip_file" "$target_zip"
           fi
           
-          HASH256=$(sha256sum "$target_zip" | cut -d" " -f1)
+          # Move to SDK download directory
+          mkdir -p openwrt-sdk/dl
+          mv "$target_zip" openwrt-sdk/dl/
+          
+          HASH256=$(sha256sum "openwrt-sdk/dl/$target_zip" | cut -d" " -f1)
           echo "HASH256=$HASH256" >> $GITHUB_ENV
           echo "HASH256: $HASH256"
 
