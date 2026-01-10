@@ -70,6 +70,12 @@ jobs:
           echo "HASH256=$HASH256" >> $GITHUB_ENV
           echo "HASH256: $HASH256"
 
+      - name: Debug - List extracted files
+        run: |
+          mkdir -p openwrt-sdk/build_dir
+          cd openwrt-sdk
+          unzip -l dl/omniedge-*.zip
+
       - name: Build Package
         run: |
           cd openwrt-sdk
