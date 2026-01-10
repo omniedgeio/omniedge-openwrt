@@ -4,14 +4,10 @@ PKG_NAME:=omniedge
 OMNIEDGE_VERSION?=1.0.1
 PKG_VERSION:=$(OMNIEDGE_VERSION)
 PKG_RELEASE:=$(AUTORELEASE)
-PKG_ARCH:=$(ARCH)
-
-PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION)-openwrt-$(PKG_ARCH).zip
+OMNIEDGE_ARCH?=$(ARCH)
+PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION)-openwrt-$(OMNIEDGE_ARCH).zip
 PKG_SOURCE_URL:=https://github.com/omniedgeio/omniedge/releases/download/v$(PKG_VERSION)
 PKG_HASH:=$(HASH256)
-
-PKG_MAINTAINER:=omniedge <hi@omniedge.io>
-PKG_LICENSE:=GPL-3.0
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -30,7 +26,7 @@ endef
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
-	$(UNZIP) -d $(PKG_BUILD_DIR) $(DL_DIR)/$(PKG_SOURCE)
+	$(UNZIP) -j -d $(PKG_BUILD_DIR) $(DL_DIR)/$(PKG_SOURCE)
 endef
 
 define Build/Compile

@@ -70,26 +70,17 @@ jobs:
           echo "HASH256=$HASH256" >> $GITHUB_ENV
           echo "HASH256: $HASH256"
 
-      - name: Debug - List extracted files
-        run: |
-          mkdir -p openwrt-sdk/build_dir
-          cd openwrt-sdk
-          unzip -l dl/omniedge-*.zip
-
       - name: Build Package
         run: |
-          echo "src-link omniedge $GITHUB_WORKSPACE" > openwrt-sdk/feeds.conf
-          echo 'CONFIG_PACKAGE_omniedge=y
-          ' >> openwrt-sdk/.config
           cd openwrt-sdk
-          cat feeds.conf.default >> feeds.conf
-          cat feeds.conf
-
-          ./scripts/feeds update -a -f > /dev/null
+          ln -s $GITHUB_WORKSPACE/omniedge package/omniedge
+          
+          # Update feeds without omniedge to avoid recursion
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          
           make defconfig
-
-          ./scripts/feeds install -d y -f -a
-          make package/omniedge/compile V=s
+          make package/omniedge/compile V=s OMNIEDGE_ARCH=${{ matrix.target.arch }}
           tree bin/packages/
 
       - name: Archive package
