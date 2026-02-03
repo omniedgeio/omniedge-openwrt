@@ -1,6 +1,6 @@
 # omniedge-openwrt
 
-> Latest version: 2.2.2
+> Latest version: 2.2.3
 
 OpenWrt package for [omniedge](https://github.com/omniedgeio/omniedge)
 
